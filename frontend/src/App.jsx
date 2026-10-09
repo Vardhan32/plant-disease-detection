@@ -37,17 +37,25 @@ function App() {
     }
     const file = files[0];
 
+    const clearCurrentImage = () => {
+      setImage(null);
+      setPreviewUrl('');
+      setPrediction('');
+      setConfidence(null);
+      setPrecautionsVisible(false);
+    };
+
     if (!ACCEPTED_TYPES.includes(file.type)) {
-      setError('Please choose a JPEG, PNG, WebP, or BMP image.');
+      clearCurrentImage();
+      e.target.value = '';
+      setError('Unsupported file type. Choose a JPEG, PNG, WebP, or BMP image.');
       return;
     }
     if (file.size > MAX_FILE_BYTES) {
-      setError('Image is too large. Please choose a file under 8 MB.');
+      clearCurrentImage();
+      e.target.value = '';
+      setError('Image is too large. Maximum file size is 8 MB.');
       return;
-    }
-
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
     }
     setImage(file);
     setPrediction('');
