@@ -1,42 +1,156 @@
 # Plant Leaf Disease Detection
 
-A React + Flask web application that classifies an uploaded plant-leaf image using a TensorFlow/Keras image-classification model. The backend returns a predicted class and confidence score; the frontend can read the prediction aloud using the browser's built-in speech synthesis.
+A web application that predicts plant-leaf disease classes from an uploaded image. It uses a React frontend, a Flask API, and a TensorFlow/Keras image-classification model. The interface displays the predicted class and confidence score and can read the result aloud using the browser's built-in speech synthesis.
 
-> **Project attribution:** This repository is adapted from [Chandini7203/plant-disease-app](https://github.com/Chandini7203/plant-disease-app). The training script structure, Flask inference code, and React component are derived from that upstream project, with local modifications (15-class retraining, `/health` endpoint, hardened training/inference code, improved UI). It is a fork/adaptation, not an entirely original implementation.
-
-> **License note:** The upstream repository contains no license file (checked October 2026), so no redistribution rights are granted there by default. Do not assume attribution alone permits reuse — confirm licensing with the repository owner before redistributing this code or the trained model. No license is added here; that decision is left to the owner.
+> **Project note:** This repository adapts an existing plant-disease detection implementation and includes local changes to the model classes, inference API, validation, and user interface. It should be described as an adapted project, not as an entirely original implementation.
+>
+> **Licensing:** The original source repository did not provide a license file when checked in October 2026. Permission to redistribute code or model artifacts may therefore be unresolved. Attribution alone does not grant reuse rights. Confirm the applicable permissions before redistributing this project.
 
 ## Features
 
-- Upload a plant-leaf image in the React interface (JPEG, PNG, WebP, BMP; up to 8 MB).
-- Send the image to a Flask `/predict` endpoint.
-- Resize the image to 128 × 128 and run model inference.
-- Display the predicted class and confidence score, with a note that confidence is not a guarantee of correctness.
-- Optionally speak the prediction using the browser's built-in `SpeechSynthesis` API.
-- Display general plant-care precautions.
-- `GET /health` endpoint reporting backend status and class count.
+- Upload a leaf image in JPEG, PNG, WebP, or BMP format (maximum 8 MB).
+- Predict a class through the Flask `/predict` API.
+- Display the predicted class and model confidence.
+- Read the prediction aloud with the browser's `SpeechSynthesis` API.
+- Show general plant-care precautions.
+- Check backend status and supported class count through `GET /health`.
+- Run backend tests and build the frontend in CI.
 
-## Tech stack
+## Technology stack
 
-- **Frontend:** React, Vite, JavaScript, Axios
-- **Backend:** Python, Flask, Flask-CORS
-- **ML:** TensorFlow/Keras, EfficientNetB0 pretrained on ImageNet, NumPy
-- **Image handling:** Pillow (PIL)
-- **Voice output:** Browser `SpeechSynthesis` API — the current frontend does not use gTTS
-- **Dataset source:** [PlantVillage dataset on Kaggle](https://www.kaggle.com/datasets/emmarex/plantdisease)
+| Area | Technologies |
+|---|---|
+| Frontend | React, Vite, JavaScript, Axios |
+| Backend | Python, Flask, Flask-CORS |
+| Machine learning | TensorFlow/Keras, EfficientNetB0, NumPy |
+| Image processing | Pillow |
+| Dataset | [PlantVillage dataset on Kaggle](https://www.kaggle.com/datasets/emmarex/plantdisease) |
 
-## Repository layout
+## How it works
 
+1. A user uploads a plant-leaf image in the web interface.
+2. The frontend sends the image to the Flask API.
+3. The backend converts the image to RGB and resizes it to 128 × 128 pixels.
+4. The trained model predicts one of the 15 supported classes.
+5. The interface displays the class and confidence score, with an optional spoken result.
+
+**Important:** The confidence score is not a guarantee that the prediction is correct. Use the result as an initial indication, not as a definitive diagnosis.
+
+## Supported classes
+
+The model supports 15 classes across pepper, potato, and tomato:
+
+- **Pepper:** bacterial spot, healthy
+- **Potato:** early blight, late blight, healthy
+- **Tomato:** bacterial spot, early blight, late blight, leaf mold, Septoria leaf spot, spider mites, target spot, yellow leaf curl virus, mosaic virus, healthy
+
+The exact class-to-output-index mapping is stored in `backend/saved_model/class_names.json`.
+
+## Run locally
+
+### Prerequisites
+
+- Python and pip
+- Node.js and npm
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/Vardhan32/plant-disease-detection.git
+cd plant-disease-detection
 ```
+
+### 2. Install Python dependencies
+
+Run these commands from the repository root:
+
+```bash
+pip install -r requirements.txt
+python -m unittest discover -s backend -p "test_*.py" -t .
+```
+
+The backend tests cover the health endpoint, image prediction, invalid or missing uploads, and consistency of the class mapping. They use the tracked model, so retraining is not required to run them.
+
+### 3. Start the backend
+
+From the repository root:
+
+```bash
+python backend/app.py
+```
+
+The API runs at `http://127.0.0.1:5000` by default.
+
+Optional environment variables:
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `PORT` | Backend port | `5000` |
+| `MAX_UPLOAD_MB` | Maximum upload size in MB | `8` |
+| `CORS_ORIGINS` | Comma-separated allowed origins | `*` |
+| `FLASK_DEBUG` | Enable Flask debug mode for local development | Disabled |
+
+For deployment, configure CORS to allow only the origins you trust.
+
+### 4. Start the frontend
+
+Open a second terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open the local URL printed by Vite (typically `http://localhost:5173`).
+
+To use a backend at a different URL, copy `frontend/.env.example` to `frontend/.env` and set `VITE_API_URL`. To verify the production frontend build, run:
+
+```bash
+npm run build
+```
+
+## Model details and evaluation
+
+- **Architecture:** EfficientNetB0 pretrained on ImageNet, used as a frozen feature extractor, followed by global average pooling, a 128-unit ReLU dense layer, dropout (0.3), and a 15-class softmax output.
+- **Input:** RGB image resized to 128 × 128.
+- **Optimizer:** Adam, learning rate 0.0001.
+- **Loss:** Categorical cross-entropy.
+- **Training:** 5 epochs with an 80/20 training-validation split.
+- **Augmentation:** Random flips, rotations, and zoom are not currently applied.
+- **Evaluation caveat:** The last recorded run reported training accuracy of 0.862 and validation accuracy of 0.896. Validation accuracy is not independent test accuracy; evaluate on a separate held-out test set before making stronger performance claims. Results can vary between runs.
+
+EfficientNetB0 includes its own input rescaling layer. The training and inference code pass RGB pixel values in the 0–255 range without dividing them by 255.
+
+### Retrain the model (optional)
+
+The repository includes a saved model, so retraining is not needed for normal local use. To train again, run from the repository root:
+
+```bash
+pip install -r requirements.txt
+python backend/train.py
+```
+
+Training may download the pretrained EfficientNetB0 weights on the first run and can take time on a CPU. The training script validates the generated model artifacts before replacing the saved model, class mapping, and metrics. Keep these files together:
+
+- `backend/saved_model/plant_disease_model.h5`
+- `backend/saved_model/class_names.json`
+- `backend/saved_model/training_metrics.json`
+
+Retraining is separate from the normal CI checks. The CI workflow tests the backend and builds the frontend; a manual retraining workflow may also be available in the GitHub Actions tab.
+
+## Repository structure
+
+```text
 backend/
   app.py
   train.py
   convert_model.py
   test_app.py
   saved_model/
-    plant_disease_model.h5  # Tracked 15-class model; runs without retraining
-    class_names.json        # Class labels in model output-index order
-    training_metrics.json   # Training/validation metrics from the last run
+    plant_disease_model.h5
+    class_names.json
+    training_metrics.json
 frontend/
   src/
   index.html
@@ -45,145 +159,17 @@ requirements.txt
 README.md
 ```
 
-## Run locally
+## Limitations
 
-### 1. Clone this repository
+- Only the 15 listed pepper, potato, and tomato classes are supported. Other crops, unrelated images, or poor-quality photos may still be assigned an available class.
+- Predictions can be incorrect, including confusion between visually similar diseases. Confirm important decisions with a qualified agricultural expert.
+- The repository does not currently provide an independent held-out test-set evaluation.
+- Plant-care precautions are general information and are not a substitute for disease-specific expert advice.
+- The application is a learning project and should not be treated as a production-grade diagnostic system.
 
-```bash
-git clone https://github.com/Vardhan32/plant-disease-detection.git
-cd plant-disease-detection
-```
+## Future improvements
 
-### 2. Dataset
-
-The `dataset/PlantVillage/` class folders (15 classes, ~20,600 images) are already committed in this repository's history, so a fresh clone includes the training data and no download step is needed. The layout is:
-
-```
-dataset/PlantVillage/
-  Pepper__bell___Bacterial_spot/
-  Pepper__bell___healthy/
-  Potato___Early_blight/
-  Potato___healthy/
-  Potato___Late_blight/
-  Tomato_Bacterial_spot/
-  Tomato_Early_blight/
-  Tomato_Late_blight/
-  Tomato_Leaf_Mold/
-  Tomato_Septoria_leaf_spot/
-  Tomato_Spider_mites_Two_spotted_spider_mite/
-  Tomato__Target_Spot/
-  Tomato__Tomato_YellowLeaf__Curl_Virus/
-  Tomato__Tomato_mosaic_virus/
-  Tomato_healthy/
-```
-
-### 3. Install Python dependencies and run the backend tests
-
-From the repository root:
-
-```bash
-pip install -r requirements.txt
-python -m unittest discover -s backend -p "test_*.py" -t .
-```
-
-The tests load the tracked model (no retraining) and cover `/health`, valid-image prediction, missing/empty/invalid uploads, and class-mapping consistency.
-
-### 4. Start the backend
-
-From the repository root:
-
-```bash
-python backend/app.py
-```
-
-The Flask app runs on `http://127.0.0.1:5000` by default. Debug mode is off unless `FLASK_DEBUG=1` is set. Optional environment variables:
-
-- `PORT` — backend port (default `5000`)
-- `MAX_UPLOAD_MB` — maximum request size (default `8`)
-- `CORS_ORIGINS` — comma-separated allowed origins (default `*`, suitable for local development)
-- `FLASK_DEBUG=1` — enable the Flask debugger (local use only)
-
-### 5. Start the frontend
-
-In a second terminal, from the repository root:
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Open the local URL printed by Vite (typically `http://localhost:5173`). To point the UI at a non-default backend, copy `frontend/.env.example` to `frontend/.env` and set `VITE_API_URL`. To verify the production bundle builds, run `npm run build` from `frontend/`.
-
-## Retraining (local, manual)
-
-Retraining is a deliberate local step — it is not run automatically on push. The CI workflow (`.github/workflows/ci.yml`) only runs backend tests and the frontend production build. A separate manual workflow (`.github/workflows/retrain-model.yml`, launched from the repository's **Actions** tab) can retrain on a GitHub-hosted runner using the committed dataset, with no downloads or credentials required.
-
-To retrain locally, from the repository root:
-
-```bash
-pip install -r requirements.txt
-python backend/train.py
-```
-
-Training uses an 80/20 training/validation split and runs for 5 epochs (~20 minutes on CPU; downloads ~16 MB EfficientNetB0 ImageNet weights on first run). On completion it validates the new artifacts (model output count, class mapping, and metrics must agree) and only then replaces:
-
-- `backend/saved_model/plant_disease_model.h5` — trained model
-- `backend/saved_model/class_names.json` — class names in the exact output-index order used during training
-- `backend/saved_model/training_metrics.json` — class/sample counts and final-epoch training/validation metrics
-
-Keep these generated artifacts together; the inference app checks that the model output count matches the saved class-name mapping. The pre-retraining backup (`plant_disease_model_backup.h5`) is a local file and is never committed.
-
-## Model and evaluation details
-
-- **Model:** EfficientNetB0 pretrained on ImageNet, frozen as a feature extractor, followed by global average pooling, a 128-unit ReLU dense layer, dropout (0.3), and a softmax output layer.
-- **Input size:** 128 × 128 RGB.
-- **Input preprocessing:** Training (`train.py`) and inference (`app.py`) both pass RGB pixel values in the `[0, 255]` range. EfficientNetB0 includes its own rescaling layer, so neither divides pixels by 255.
-- **Optimizer:** Adam with learning rate 0.0001.
-- **Loss:** Categorical cross-entropy.
-- **Epochs:** 5.
-- **Classes (15):** Pepper bell bacterial spot and healthy; Potato early blight, late blight, and healthy; Tomato bacterial spot, early blight, late blight, leaf mold, Septoria leaf spot, spider mites, target spot, mosaic virus, yellow leaf curl virus, and healthy. See `backend/saved_model/class_names.json` for the exact output-index order.
-- **Image augmentation:** No random flips, rotations, zoom, or other augmentation is currently applied.
-- **Early stopping:** Not implemented.
-- **Accuracy:** The last training run recorded final training accuracy 0.862 and **validation accuracy 0.896** (see `training_metrics.json`). Validation accuracy is not independent test accuracy; evaluate on a separate held-out test set before presenting a final performance claim. Do not infer accuracy from a handful of sample predictions.
-
-### Count the images in your local dataset
-
-Run this from the repository root:
-
-```python
-from pathlib import Path
-
-root = Path("dataset/PlantVillage")
-extensions = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
-
-if not root.is_dir():
-    raise SystemExit(f"Dataset directory not found: {root.resolve()}")
-
-counts = {
-    folder.name: sum(
-        1 for file in folder.rglob("*")
-        if file.is_file() and file.suffix.lower() in extensions
-    )
-    for folder in root.iterdir()
-    if folder.is_dir()
-}
-
-for class_name, count in sorted(counts.items()):
-    print(f"{class_name}: {count}")
-
-print(f"Classes: {len(counts)}")
-print(f"Total images: {sum(counts.values())}")
-```
-
-Record the dataset version, class count, and total image count when documenting model results.
-
-## Current limitations
-
-- The model covers only the 15 listed classes (pepper, potato, tomato). Images of other crops or non-leaf content will still receive one of these labels.
-- Misclassification happens: during local testing, a Potato late-blight leaf was predicted as Tomato late blight at 0.52 confidence. Treat low-confidence predictions with skepticism and confirm important diagnoses independently.
-- The frontend default backend URL (`http://127.0.0.1:5000`) suits local development; configure `VITE_API_URL` for any other setup.
-- The displayed precautions are general plant-care advice, not disease-specific expert guidance.
-- A validation split is used during training, but this repository does not provide an independent test-set evaluation.
-- This is a fork/adaptation of an existing project; do not claim the upstream implementation as entirely your own.
-- No license file is present; redistribution rights are unresolved (see the license note above).
+- Evaluate on an independent test set and report per-class precision, recall, and a confusion matrix.
+- Add confidence thresholds and a clear fallback for unsupported or low-quality images.
+- Apply and compare appropriate image augmentation strategies.
+- Improve accessibility, mobile responsiveness, and deployment configuration.
