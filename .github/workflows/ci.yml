@@ -57,3 +57,40 @@ jobs:
 
       - name: Production build
         run: npm run build
+
+  docker-compose-smoke-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build and start the full application
+        run: docker compose up --build --detach
+
+      - name: Verify backend health and frontend response
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in {1..60}; do
+            if curl --fail --silent http://127.0.0.1:5000/health > /tmp/backend-health.json; then
+              break
+            fi
+            if [ "$attempt" -eq 60 ]; then
+              docker compose logs
+              echo "Backend did not become healthy within 5 minutes."
+              exit 1
+            fi
+            sleep 5
+          done
+          cat /tmp/backend-health.json
+          curl --fail --silent http://127.0.0.1:5173/ > /dev/null
+          echo "Backend health endpoint and frontend HTTP response passed."
+
+      - name: Show container logs on failure
+        if: failure()
+        run: docker compose logs
+
+      - name: Stop containers
+        if: always()
+        run: docker compose down --volumes
