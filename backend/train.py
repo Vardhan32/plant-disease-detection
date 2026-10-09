@@ -96,9 +96,16 @@ def main():
     )
 
     MODEL_DIR.mkdir(parents=True, exist_ok=True)
-    model.save(str(MODEL_PATH))
 
-    with CLASS_NAMES_PATH.open("w", encoding="utf-8") as file:
+    # Save to temporary paths first so an interrupted run never leaves a
+    # half-written model. Only replace the active files after validation.
+    tmp_model_path = MODEL_DIR / "plant_disease_model_new.h5"
+    tmp_classes_path = MODEL_DIR / "class_names_new.json"
+    tmp_metrics_path = MODEL_DIR / "training_metrics_new.json"
+
+    model.save(str(tmp_model_path))
+
+    with tmp_classes_path.open("w", encoding="utf-8") as file:
         json.dump(class_names, file, indent=2, ensure_ascii=False)
 
     final_metrics = {
@@ -120,8 +127,21 @@ def main():
             "is used by this script."
         ),
     }
-    with METRICS_PATH.open("w", encoding="utf-8") as file:
+    with tmp_metrics_path.open("w", encoding="utf-8") as file:
         json.dump(metrics_record, file, indent=2, ensure_ascii=False)
+
+    # Validate the new artifacts match each other before replacing the
+    # active model. Both pre-existing .h5 files are left untouched until here.
+    reloaded = tf.keras.models.load_model(str(tmp_model_path))
+    if int(reloaded.output_shape[-1]) != len(class_names):
+        raise ValueError(
+            f"New model outputs {reloaded.output_shape[-1]} classes but "
+            f"mapping has {len(class_names)} labels. Active model not replaced."
+        )
+    del reloaded
+    tmp_model_path.replace(MODEL_PATH)
+    tmp_classes_path.replace(CLASS_NAMES_PATH)
+    tmp_metrics_path.replace(METRICS_PATH)
 
     print(f"Model saved to: {MODEL_PATH}")
     print(f"Class mapping saved to: {CLASS_NAMES_PATH}")

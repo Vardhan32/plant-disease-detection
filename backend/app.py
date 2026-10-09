@@ -42,6 +42,11 @@ if len(class_names) != model_output_classes:
     )
 
 
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"status": "ok", "classes": len(class_names)})
+
+
 @app.route("/predict", methods=["POST"])
 def predict():
     if "file" not in request.files:
