@@ -145,7 +145,7 @@ Keep these generated artifacts together; the inference app checks that the model
 - **Classes (15):** Pepper bell bacterial spot and healthy; Potato early blight, late blight, and healthy; Tomato bacterial spot, early blight, late blight, leaf mold, Septoria leaf spot, spider mites, target spot, mosaic virus, yellow leaf curl virus, and healthy. See `backend/saved_model/class_names.json` for the exact output-index order.
 - **Image augmentation:** No random flips, rotations, zoom, or other augmentation is currently applied.
 - **Early stopping:** Not implemented.
-- **Accuracy:** The last training run recorded final training accuracy 0.860 and **validation accuracy 0.898** (see `training_metrics.json`). Validation accuracy is not independent test accuracy; evaluate on a separate held-out test set before presenting a final performance claim. Do not infer accuracy from a handful of sample predictions.
+- **Accuracy:** The last training run recorded final training accuracy 0.862 and **validation accuracy 0.896** (see `training_metrics.json`). Validation accuracy is not independent test accuracy; evaluate on a separate held-out test set before presenting a final performance claim. Do not infer accuracy from a handful of sample predictions.
 
 ### Count the images in your local dataset
 
