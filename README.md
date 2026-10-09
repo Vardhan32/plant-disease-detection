@@ -37,7 +37,7 @@ requirements.txt
 README.md
 ```
 
-The training script expects the dataset at `dataset/PlantVillage/`, with one subdirectory per class. The dataset and trained model are not bundled in this repository.
+The training script expects the dataset at `dataset/PlantVillage/`, with one subdirectory per class. The repository currently contains the dataset folders and an existing model file. The retraining workflow below rebuilds the model using the corrected preprocessing and saves the matching class mapping and metrics.
 
 ## Run locally
 
@@ -61,7 +61,7 @@ dataset/PlantVillage/
 
 Each class folder should contain its corresponding images.
 
-### 3. Install Python dependencies and train the model
+### 3. Install Python dependencies and train the model locally (optional)
 
 From the repository root:
 
@@ -70,7 +70,7 @@ pip install -r requirements.txt
 python backend/train.py
 ```
 
-Training uses an 80/20 training/validation split and runs for up to 5 epochs. On completion, it generates these local files:
+Training uses an 80/20 training/validation split and runs for up to 5 epochs. On completion, it generates these files:
 
 - `backend/saved_model/plant_disease_model.h5` — trained model
 - `backend/saved_model/class_names.json` — class names in the exact output-index order used during training
@@ -99,6 +99,12 @@ npm run dev
 ```
 
 Open the local URL printed by Vite (typically `http://localhost:5173`).
+
+## Automated retraining
+
+A GitHub Actions workflow is configured at [`.github/workflows/retrain-model.yml`](.github/workflows/retrain-model.yml). It can retrain the model on pushes that change the training script or dependencies, and it can also be started manually from the repository's **Actions** tab. When training succeeds, it records the class mapping and metrics and commits the updated model artifacts back to the repository.
+
+Training runs on a GitHub-hosted CPU runner, so it may take some time. Check the workflow run logs if it fails; do not assume new metrics exist until the run completes successfully.
 
 ## Model and evaluation details
 
