@@ -18,7 +18,11 @@ try:
     _max_upload_mb = int(os.environ.get("MAX_UPLOAD_MB", "8"))
 except ValueError:
     _max_upload_mb = 8
-app.config["MAX_CONTENT_LENGTH"] = _max_upload_mb * 1024 * 1024
+# Allow a little multipart/form-data overhead, then enforce the limit on the
+# uploaded file itself in /predict. This lets an image exactly at the limit pass.
+MAX_UPLOAD_BYTES = _max_upload_mb * 1024 * 1024
+MULTIPART_OVERHEAD_BYTES = 64 * 1024
+app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_BYTES + MULTIPART_OVERHEAD_BYTES
 
 # CORS: permissive by default for local development (Vite on localhost:5173
 # calling 127.0.0.1:5000). Restrict in other environments with a
@@ -74,7 +78,7 @@ def request_too_large(_exc):
             {
                 "error": (
                     f"Uploaded file is too large. "
-                    f"Maximum request size is {_max_upload_mb} MB."
+                    f"Maximum upload size is {_max_upload_mb} MB."
                 )
             }
         ),
@@ -98,6 +102,11 @@ def predict():
 
     try:
         raw = file.read()
+        if len(raw) > MAX_UPLOAD_BYTES:
+            return (
+                jsonify({"error": f"Uploaded file is too large. Maximum file size is {_max_upload_mb} MB."}),
+                413,
+            )
         if not raw:
             return jsonify({"error": "Uploaded file is empty"}), 400
         image = Image.open(io.BytesIO(raw)).convert("RGB")

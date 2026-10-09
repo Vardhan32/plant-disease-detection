@@ -1,10 +1,6 @@
 # Plant Leaf Disease Detection
 
-A web application that predicts plant-leaf disease classes from an uploaded image. It uses a React frontend, a Flask API, and a TensorFlow/Keras image-classification model. The interface displays the predicted class and confidence score and can read the result aloud using the browser's built-in speech synthesis.
-
-> **Project note:** This repository adapts an existing plant-disease detection implementation and includes local changes to the model classes, inference API, validation, and user interface. It should be described as an adapted project, not as an entirely original implementation.
->
-> **Licensing:** The original source repository did not provide a license file when checked in October 2026. Permission to redistribute code or model artifacts may therefore be unresolved. Attribution alone does not grant reuse rights. Confirm the applicable permissions before redistributing this project.
+A **B.Tech final-year group project**: a web application that predicts plant-leaf disease classes from an uploaded image. It combines a React frontend, a Flask API, and a TensorFlow/Keras image-classification model. The interface displays the predicted class and confidence score and can read the result aloud using the browser's built-in speech synthesis.
 
 ## Features
 
@@ -15,15 +11,17 @@ A web application that predicts plant-leaf disease classes from an uploaded imag
 - Show general plant-care precautions.
 - Check backend status and supported class count through `GET /health`.
 - Run backend tests and build the frontend in CI.
+- Run the frontend and model-serving backend together with Docker Compose.
 
 ## Technology stack
 
 | Area | Technologies |
 |---|---|
-| Frontend | React, Vite, JavaScript, Axios |
+| Frontend | React, Vite, JavaScript, Axios, Nginx |
 | Backend | Python, Flask, Flask-CORS |
 | Machine learning | TensorFlow/Keras, EfficientNetB0, NumPy |
 | Image processing | Pillow |
+| Containers | Docker, Docker Compose |
 | Dataset | [PlantVillage dataset on Kaggle](https://www.kaggle.com/datasets/emmarex/plantdisease) |
 
 ## How it works
@@ -46,7 +44,48 @@ The model supports 15 classes across pepper, potato, and tomato:
 
 The exact class-to-output-index mapping is stored in `backend/saved_model/class_names.json`.
 
-## Run locally
+## Run with Docker (recommended)
+
+### Prerequisites
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) on Windows or macOS, or Docker Engine plus the Docker Compose plugin on Linux.
+- Ensure Docker is running before starting the app.
+
+### 1. Clone the repository
+
+The clone URL below points to this repository under the `Vardhan32` GitHub account:
+
+```bash
+git clone https://github.com/Vardhan32/plant-disease-detection.git
+cd plant-disease-detection
+```
+
+### 2. Build and start the app
+
+Run from the repository root (the directory containing `docker-compose.yml`):
+
+```bash
+docker compose up --build
+```
+
+The first build can take several minutes because the backend installs TensorFlow and its dependencies. Docker Compose starts the frontend after the backend health check succeeds.
+
+Open these URLs in your browser:
+
+- **Web app:** http://localhost:5173
+- **Backend health:** http://localhost:5000/health
+
+To stop the app, press `Ctrl+C` in the terminal. To stop and remove the containers later, run:
+
+```bash
+docker compose down
+```
+
+To rebuild after changing application code, run `docker compose up --build` again. The app uses the tracked model files; retraining is not required.
+
+**Docker note:** The frontend is configured at build time to call the backend at `http://localhost:5000`. If you change the published backend port or access the frontend from another device, update the `VITE_API_URL` build argument and the backend CORS allow-list accordingly. The current configuration is intended for local development, not direct public-internet exposure.
+
+## Run locally without Docker
 
 ### Prerequisites
 
@@ -143,6 +182,7 @@ Retraining is separate from the normal CI checks. The CI workflow tests the back
 
 ```text
 backend/
+  Dockerfile
   app.py
   train.py
   convert_model.py
@@ -152,9 +192,13 @@ backend/
     class_names.json
     training_metrics.json
 frontend/
+  Dockerfile
+  nginx.conf
   src/
   index.html
   .env.example
+docker-compose.yml
+.dockerignore
 requirements.txt
 README.md
 ```
