@@ -1,59 +1,56 @@
-# 🌿 Plant Leaf Disease Detection using Machine Learning
+# Plant Leaf Disease Detection
 
-A full-stack web application to detect diseases in plant leaves using a **Convolutional Neural Network (CNN)** model. Users can upload a leaf image and receive disease predictions with confidence score and precautionary advice. Designed for accessibility and ease of use.
+A React + Flask web application that classifies an uploaded plant-leaf image using a TensorFlow/Keras image-classification model. The backend returns a predicted class and confidence score; the frontend can read the prediction aloud using the browser's built-in speech synthesis.
 
----
+> **Project attribution:** This repository is based on [Chandini7203/plant-disease-app](https://github.com/Chandini7203/plant-disease-app). The current README, training script, Flask inference code, and React component retain the corresponding upstream implementations. I have not verified any substantial original changes to those core files, so this project should be described as a fork/adaptation rather than entirely original work. Any future changes should be documented here clearly.
 
-## 🧠 Overview
+## Features
 
-- **Goal**: Detect diseases in plant leaves using image-based ML model
-- **Model**: CNN trained on the PlantVillage dataset
-- **Frontend**: React (with Vite)
-- **Backend**: Flask + TensorFlow
-- **Voice Feature**: Speaks out the prediction (only for disease name)
-- **Extra Modules Used**: `gTTS` for voice, `flask-cors` for CORS handling, `numpy`, `PIL`, etc.
+- Upload a plant-leaf image in the React interface.
+- Send the image to a Flask `/predict` endpoint.
+- Resize the image to 128 × 128 and run model inference.
+- Display the predicted class and confidence score.
+- Optionally speak the prediction using the browser's built-in `SpeechSynthesis` API.
+- Display general plant-care precautions.
 
----
+## Tech stack
 
-## 📁 Folder Structure
+- **Frontend:** React, Vite, JavaScript, Axios
+- **Backend:** Python, Flask, Flask-CORS
+- **ML:** TensorFlow/Keras, EfficientNetB0 pretrained on ImageNet, NumPy
+- **Image handling:** Pillow (PIL)
+- **Voice output:** Browser `SpeechSynthesis` API — no gTTS dependency is used by the current frontend
+- **Dataset source:** [PlantVillage dataset on Kaggle](https://www.kaggle.com/datasets/emmarex/plantdisease)
+
+## Repository layout
 
 ```
-plant-disease-app/
-│
-├── backend/
-│   ├── app.py                         # Flask server with prediction route
-│   ├── saved_model/
-│   │   └── plant_disease_model.h5     # Trained CNN model
-│
-├── frontend/
-│   ├── src/
-│   │   └── App.jsx                    # React UI logic
-│   ├── index.html
-│
-├── images/                            # Screenshots for README
-│   ├── homepage.png
-│   ├── uploading.png
-│   ├── prediction_result.png
-│   ├── precautions.png
-│
-├── requirements.txt                   # Backend Python dependencies
-└── README.md
+backend/
+  app.py
+  train.py
+  convert_model.py
+  saved_model/
+frontend/
+  src/
+  index.html
+requirements.txt
+README.md
 ```
 
----
+The training script expects the dataset at `dataset/PlantVillage/`, with one subdirectory per class. The dataset itself is not described by a reproducible image-count manifest in this repository.
 
-## ⚙️ How to Run the Project Locally
+## Run locally
 
-### 🔧 1. Clone the Repository
+### 1. Clone this repository
 
 ```bash
-git clone https://github.com/Chandini7203/plant-disease-app.git
-cd plant-disease-app
+git clone https://github.com/Vardhan32/plant-disease-detection.git
+cd plant-disease-detection
 ```
 
-### 🧪 2. Setup and Start the Backend
+### 2. Start the backend
 
-> Make sure you're in the root directory
+From the repository root:
 
 ```bash
 pip install -r requirements.txt
@@ -61,7 +58,11 @@ cd backend
 python app.py
 ```
 
-### 🌐 3. Start the Frontend
+The Flask app runs on `http://127.0.0.1:5000` by default. The saved model must exist at `backend/saved_model/plant_disease_model.h5` before starting the app.
+
+### 3. Start the frontend
+
+In a second terminal, from the repository root:
 
 ```bash
 cd frontend
@@ -69,67 +70,58 @@ npm install
 npm run dev
 ```
 
-Now visit: [http://localhost:5173](http://localhost:5173)
+Open the local URL printed by Vite (typically `http://localhost:5173`).
 
----
+## Model and evaluation details
 
-## 📸 Screenshots
+- **Model:** EfficientNetB0 pretrained on ImageNet, frozen as a feature extractor, followed by global average pooling, a 128-unit ReLU dense layer, dropout (0.3), and a softmax output layer.
+- **Input size:** 128 × 128 RGB.
+- **Optimizer:** Adam with learning rate 0.0001.
+- **Loss:** Categorical cross-entropy.
+- **Epochs in the current training script:** 5.
+- **Class labels in inference code:** 10 hard-coded labels in `backend/app.py`. The training script derives the output size from the number of subdirectories in the dataset, so verify that the dataset contains exactly these 10 classes and that the class order matches before using the saved model.
+- **Image augmentation:** The current training script rescales pixel values and creates an 80/20 training/validation split. It does **not** currently apply random flips, rotations, zoom, or other image augmentation.
+- **Early stopping:** Not implemented in the current training script.
+- **Accuracy:** Not reported here. An earlier README claimed approximately 94%, but no training log or evaluation artifact is committed to show whether that was training or validation accuracy. Do not quote 94% as a verified result unless you can reproduce it and record the relevant metric.
 
-- **🏠 Homepage**  
-  ![Homepage](./images/Homepage.png)
+### Count the images in your local dataset
 
-- **📤 Image Upload**  
-  ![Uploading](./images/uploading.png)
+The image count depends on the exact dataset copy placed in `dataset/PlantVillage`. Run this from the repository root to count common image formats by class and in total:
 
-- **📊 Prediction Result**  
-  ![Prediction](./images/prediction_result.png)
+```python
+from pathlib import Path
 
-- **💡 Precaution View**  
-  ![Precautions](./images/precautions.png)
+root = Path("dataset/PlantVillage")
+extensions = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 
----
+if not root.is_dir():
+    raise SystemExit(f"Dataset directory not found: {root.resolve()}")
 
-## ✅ Features
+counts = {
+    folder.name: sum(
+        1 for file in folder.rglob("*")
+        if file.is_file() and file.suffix.lower() in extensions
+    )
+    for folder in root.iterdir()
+    if folder.is_dir()
+}
 
-- 📷 Upload leaf image to predict disease  
-- ⚡ Fast and accurate CNN predictions  
-- 📢 Voice output using browser TTS (no external APIs)  
-- 🌱 Precautions displayed for each disease  
-- 💻 Simple, responsive, and user-friendly interface
+for class_name, count in sorted(counts.items()):
+    print(f"{class_name}: {count}")
 
----
-
-## 📌 Technologies Used
-
-| Component   | Tools/Frameworks             |
-|-------------|-------------------------------|
-| Frontend    | React (Vite), HTML, CSS, JS   |
-| Backend     | Flask, Flask-CORS, Python     |
-| Model       | TensorFlow, Keras, NumPy      |
-| Utilities   | Pillow (PIL), SpeechSynthesis |
-| Dataset     | [PlantVillage on Kaggle](https://www.kaggle.com/datasets/emmarex/plantdisease)
-
----
-
-## 🧠 Model Details
-
-- **Architecture**: CNN with custom layers  
-- **Input Size**: 128x128 pixels  
-- **Activation**: Softmax on final layer  
-- **Loss**: Categorical Crossentropy  
-- **Optimizer**: Adam  
-- **Epochs**: 5  
-- **Accuracy Achieved**: ~94%
-
----
-
-## 🚀 Git Commands to Push Changes
-
-```bash
-git add .
-git commit -m "Updated files"
-git push origin main
+print(f"Classes: {len(counts)}")
+print(f"Total images: {sum(counts.values())}")
 ```
 
----
+Record the resulting class count and image total alongside the dataset version used for training. For evaluation, keep the validation accuracy from the final training epoch separate from training accuracy, and preferably evaluate on a held-out test set that was not used for training or model selection.
 
+## Current limitations to address
+
+- The backend's class labels are hard-coded. Keep them synchronized with the training generator's class-to-index mapping.
+- The frontend currently points to `http://127.0.0.1:5000/predict`; this is suitable for local development, not a deployed service.
+- The displayed precautions are general plant-care advice, not disease-specific expert guidance.
+- The repository does not currently provide a committed training log, dataset manifest, or independent test evaluation.
+
+## Screenshots
+
+If the screenshots are present in the repository, add them here using their actual paths. Avoid broken image links.
