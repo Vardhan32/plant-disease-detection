@@ -22,7 +22,7 @@ REPO_DIR = os.path.dirname(BACKEND_DIR)
 if REPO_DIR not in sys.path:
     sys.path.insert(0, REPO_DIR)
 
-from backend.app import app, class_names, model  # noqa: E402
+from backend.app import MAX_UPLOAD_BYTES, app, class_names, model  # noqa: E402
 
 
 def make_image_bytes(fmt="JPEG", size=(128, 128), color=(34, 139, 34)):
@@ -85,6 +85,12 @@ class PredictTest(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("error", response.get_json())
 
+    def test_file_over_configured_limit_returns_413(self):
+        # Multipart overhead is allowed beyond the configured file-size limit.
+        oversized_data = b"x" * (MAX_UPLOAD_BYTES + 1)
+        response = self.post_image(oversized_data, "too-large.jpg")
+        self.assertEqual(response.status_code, 413)
+        self.assertIn("Maximum file size", response.get_json()["error"])
     def test_invalid_image_returns_400(self):
         response = self.post_image(b"this is not image data", "leaf.jpg")
         self.assertEqual(response.status_code, 400)
