@@ -1,0 +1,62 @@
+name: Retrain plant disease model
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "backend/train.py"
+      - "requirements.txt"
+      - ".github/workflows/retrain-model.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Check out repository and dataset
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Train model
+        run: python backend/train.py
+
+      - name: Upload training report
+        uses: actions/upload-artifact@v4
+        with:
+          name: plant-disease-training-results
+          path: |
+            backend/saved_model/training_metrics.json
+            backend/saved_model/class_names.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Commit updated model and training metadata
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add backend/saved_model/plant_disease_model.h5
+          git add backend/saved_model/class_names.json
+          git add backend/saved_model/training_metrics.json
+          if git diff --cached --quiet; then
+            echo "No generated model files changed."
+          else
+            git commit -m "Retrain plant disease model and record metrics"
+            git push
+          fi
