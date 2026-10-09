@@ -3,6 +3,7 @@ numpy
 pandas
 matplotlib
 flask
+flask-cors
 opencv-python
 scikit-learn
 pillow
