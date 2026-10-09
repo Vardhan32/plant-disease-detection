@@ -25,10 +25,10 @@
   "train_samples": 16516,
   "validation_samples": 4122,
   "final_epoch_metrics": {
-    "accuracy": 0.8599539995193481,
-    "loss": 0.454998254776001,
-    "val_accuracy": 0.8976225256919861,
-    "val_loss": 0.3433333933353424
+    "accuracy": 0.861891508102417,
+    "loss": 0.43911686539649963,
+    "val_accuracy": 0.8959243297576904,
+    "val_loss": 0.34178707003593445
   },
   "note": "Validation metrics are from the 20% validation split, not an independent test set. No image augmentation or early stopping is used by this script."
 }
