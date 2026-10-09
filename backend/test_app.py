@@ -91,6 +91,7 @@ class PredictTest(unittest.TestCase):
         response = self.post_image(oversized_data, "too-large.jpg")
         self.assertEqual(response.status_code, 413)
         self.assertIn("Maximum file size", response.get_json()["error"])
+
     def test_invalid_image_returns_400(self):
         response = self.post_image(b"this is not image data", "leaf.jpg")
         self.assertEqual(response.status_code, 400)
