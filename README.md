@@ -50,8 +50,8 @@ README.md
 ### 1. Clone this repository
 
 ```bash
-git clone https://github.com/Vardhan32/plant-disease-detection-migration.git
-cd plant-disease-detection-migration
+git clone https://github.com/Vardhan32/plant-disease-detection.git
+cd plant-disease-detection
 ```
 
 ### 2. Dataset
