@@ -13,3 +13,6 @@ backend/saved_model/plant_disease_model_backup.h5
 backend/saved_model/plant_disease_model_new.h5
 backend/saved_model/class_names_new.json
 backend/saved_model/training_metrics_new.json
+# Runtime user uploads; never commit uploaded images.
+backend/uploads/*
+!backend/uploads/.gitkeep
