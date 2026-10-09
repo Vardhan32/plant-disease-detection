@@ -32,6 +32,35 @@ input[type="file"] {
   background: #21262d;
   color: white;
   border-radius: 5px;
+  max-width: 100%;
+}
+
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+
+.error {
+  color: #ff7b72;
+  background-color: #21262d;
+  padding: 10px 15px;
+  border-radius: 10px;
+  margin-top: 15px;
+}
+
+.disclaimer {
+  font-size: 13px;
+  color: #9aa4b2;
+  margin-top: 5px;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
 }
 
 img {
@@ -60,7 +89,7 @@ button:hover {
   transform: scale(1.05);
 }
 
-.result, .precautions-box {
+.precautions {
   margin-top: 20px;
   text-align: left;
   background-color: #21262d;
@@ -73,7 +102,7 @@ button:hover {
   color: #7ef29d;
 }
 
-.precautions-box h3 {
+.precautions h3 {
   color: #7ef29d;
   margin-bottom: 10px;
 }

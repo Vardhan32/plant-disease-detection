@@ -138,6 +138,10 @@ def main():
             f"New model outputs {reloaded.output_shape[-1]} classes but "
             f"mapping has {len(class_names)} labels. Active model not replaced."
         )
+    if metrics_record["class_count"] != len(class_names):
+        raise ValueError("Training metrics class count does not match class mapping.")
+    if metrics_record["class_names"] != class_names:
+        raise ValueError("Training metrics class names do not match class mapping.")
     del reloaded
     tmp_model_path.replace(MODEL_PATH)
     tmp_classes_path.replace(CLASS_NAMES_PATH)

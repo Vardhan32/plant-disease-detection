@@ -1,13 +1,14 @@
 name: Retrain plant disease model
 
+# Manual retraining only. This workflow is intentionally NOT triggered by
+# pushes: training takes ~20 minutes on a CPU runner, rewrites the tracked
+# model artifacts, and should only run as a deliberate decision.
+# Requirements: the PlantVillage class folders are already committed under
+# dataset/PlantVillage/ in this repository's history, so the checkout step
+# below provides the training data with no downloads or credentials.
+# No secrets are used or required by this workflow.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - "backend/train.py"
-      - "requirements.txt"
-      - ".github/workflows/retrain-model.yml"
 
 permissions:
   contents: write
@@ -20,7 +21,8 @@ jobs:
       - name: Check out repository and dataset
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          # Full history so the retrain commit can be pushed back.
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
