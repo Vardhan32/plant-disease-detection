@@ -1,5 +1,5 @@
 {
-    "name": "plant-disease-app",
+    "name": "plant-leaf-disease-detection",
     "version": "1.0.0",
     "private": true,
     "scripts": {
