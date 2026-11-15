@@ -1,0 +1,274 @@
+{
+  "data_dir": "C:\\Users\\harsh\\Documents\\Default Project\\plant-disease-detection\\dataset\\PlantVillage",
+  "image_count": 20638,
+  "class_count": 15,
+  "class_counts": {
+    "Pepper__bell___Bacterial_spot": 997,
+    "Pepper__bell___healthy": 1478,
+    "Potato___Early_blight": 1000,
+    "Potato___Late_blight": 1000,
+    "Potato___healthy": 152,
+    "Tomato_Bacterial_spot": 2127,
+    "Tomato_Early_blight": 1000,
+    "Tomato_Late_blight": 1909,
+    "Tomato_Leaf_Mold": 952,
+    "Tomato_Septoria_leaf_spot": 1771,
+    "Tomato_Spider_mites_Two_spotted_spider_mite": 1676,
+    "Tomato__Target_Spot": 1404,
+    "Tomato__Tomato_YellowLeaf__Curl_Virus": 3208,
+    "Tomato__Tomato_mosaic_virus": 373,
+    "Tomato_healthy": 1591
+  },
+  "corrupt_images": [],
+  "color_modes": {
+    "RGB": 20637,
+    "RGBA": 1
+  },
+  "image_sizes": {
+    "256x256": 20638
+  },
+  "exact_duplicate_group_count": 14,
+  "exact_duplicate_image_count": 28,
+  "cross_class_exact_duplicate_groups": [],
+  "near_duplicate_group_count": 59,
+  "near_duplicate_image_count": 128,
+  "cross_class_near_duplicate_groups": [],
+  "group_count": 20569,
+  "multi_image_group_count": 59,
+  "group_size_histogram": {
+    "1": 20510,
+    "2": 51,
+    "3": 6,
+    "4": 2
+  },
+  "largest_duplicate_groups": [
+    {
+      "size": 4,
+      "class": "Tomato_healthy",
+      "examples": [
+        "dataset/PlantVillage/Tomato_healthy/167247af-fd67-4b70-a72e-052dc5ea863b___GH_HL Leaf 388.1.JPG",
+        "dataset/PlantVillage/Tomato_healthy/666598c7-f09e-4f8b-baf1-7d99e38de8c9___GH_HL Leaf 430.1.JPG",
+        "dataset/PlantVillage/Tomato_healthy/7141e8d1-1554-4030-85dc-be5e984eb6ef___GH_HL Leaf 471.JPG"
+      ]
+    },
+    {
+      "size": 4,
+      "class": "Tomato_healthy",
+      "examples": [
+        "dataset/PlantVillage/Tomato_healthy/4127b1a7-3442-4847-96cb-7ea68495039e___GH_HL Leaf 259.JPG",
+        "dataset/PlantVillage/Tomato_healthy/50a1376a-3a56-40b5-9f95-614689509505___GH_HL Leaf 413.JPG",
+        "dataset/PlantVillage/Tomato_healthy/a2317e6a-8548-432c-b69f-0f6daada41fa___GH_HL Leaf 469.1.JPG"
+      ]
+    },
+    {
+      "size": 3,
+      "class": "Tomato_Late_blight",
+      "examples": [
+        "dataset/PlantVillage/Tomato_Late_blight/16e4a1f9-21c2-4c1a-bdbc-1336da74ba2c___GHLB2 Leaf 145.3.JPG",
+        "dataset/PlantVillage/Tomato_Late_blight/bf0b58c2-1d95-4f37-80ea-1bcd82e9c59b___GHLB2 Leaf 145.4.JPG",
+        "dataset/PlantVillage/Tomato_Late_blight/cebd5337-bb61-4454-93da-bba4169f0802___GHLB2 Leaf 145.JPG"
+      ]
+    },
+    {
+      "size": 3,
+      "class": "Tomato_Late_blight",
+      "examples": [
+        "dataset/PlantVillage/Tomato_Late_blight/1e55a2c0-6618-4c42-93a6-cfc8a9d5ca77___GHLB2 Leaf 9039.JPG",
+        "dataset/PlantVillage/Tomato_Late_blight/40ad58d9-f6ab-4487-a150-e2da47f733f1___GHLB2 Leaf 8665.JPG",
+        "dataset/PlantVillage/Tomato_Late_blight/975cefdc-29dc-4355-b9bb-5abd4a910654___GHLB2 Leaf 8657.JPG"
+      ]
+    },
+    {
+      "size": 3,
+      "class": "Tomato_Late_blight",
+      "examples": [
+        "dataset/PlantVillage/Tomato_Late_blight/4a6b862b-d42f-42ea-81f5-60480236709a___GHLB2 Leaf 9083.JPG",
+        "dataset/PlantVillage/Tomato_Late_blight/91b7baba-9b15-4f24-9db7-86ca95ac884c___GHLB2 Leaf 9087.JPG",
+        "dataset/PlantVillage/Tomato_Late_blight/dadc7e0f-8caf-4db0-9a05-f4b724c73bc2___GHLB2 Leaf 8685.JPG"
+      ]
+    },
+    {
+      "size": 3,
+      "class": "Tomato_healthy",
+      "examples": [
+        "dataset/PlantVillage/Tomato_healthy/1e8c2c4d-e787-45ff-87ac-56484ac8d3d4___GH_HL Leaf 472.JPG",
+        "dataset/PlantVillage/Tomato_healthy/5576cac9-71e4-4ec3-96bd-9b5cfa94fef4___GH_HL Leaf 267.JPG",
+        "dataset/PlantVillage/Tomato_healthy/daa4e664-5ec5-4349-b8de-0673cdfe374d___GH_HL Leaf 168.1.JPG"
+      ]
+    },
+    {
+      "size": 3,
+      "class": "Tomato_healthy",
+      "examples": [
+        "dataset/PlantVillage/Tomato_healthy/4f334ff5-0f0a-4d15-8760-448bebddd4f2___GH_HL Leaf 527.JPG",
+        "dataset/PlantVillage/Tomato_healthy/5a7de071-ba6b-4a06-a3d4-eab0abdc6ecf___GH_HL Leaf 398.1.JPG",
+        "dataset/PlantVillage/Tomato_healthy/c52610f1-e253-49ac-bb6f-af3dc1d9c396___GH_HL Leaf 363.1.JPG"
+      ]
+    },
+    {
+      "size": 3,
+      "class": "Tomato_healthy",
+      "examples": [
+        "dataset/PlantVillage/Tomato_healthy/5f887895-963a-4a96-8962-5af383dbe29a___GH_HL Leaf 425.1.JPG",
+        "dataset/PlantVillage/Tomato_healthy/7ee078a8-218e-4ebf-8935-ec9f844ab744___GH_HL Leaf 212.9.JPG",
+        "dataset/PlantVillage/Tomato_healthy/c8c7cb85-d7eb-4d60-b90e-bfe5277b79ad___GH_HL Leaf 277.JPG"
+      ]
+    },
+    {
+      "size": 2,
+      "class": "Pepper__bell___healthy",
+      "examples": [
+        "dataset/PlantVillage/Pepper__bell___healthy/1dab0ba9-9982-46ec-9ef6-70a1698baf04___JR_HL 8690.JPG",
+        "dataset/PlantVillage/Pepper__bell___healthy/d382a1c3-8bd6-4a24-a231-a99b61404e48___JR_HL 8692.JPG"
+      ]
+    },
+    {
+      "size": 2,
+      "class": "Pepper__bell___healthy",
+      "examples": [
+        "dataset/PlantVillage/Pepper__bell___healthy/432a3897-5e80-45d6-b795-4fa206a58e26___JR_HL 8595.JPG",
+        "dataset/PlantVillage/Pepper__bell___healthy/f460de9c-14ab-4bac-8cb6-b25c958ae78f___JR_HL 8596.JPG"
+      ]
+    }
+  ],
+  "duplicate_method": {
+    "exact": "SHA-256 over file bytes",
+    "near": "64-bit dHash Hamming distance <= 6 plus mean squared error <= 150 on 32x32 grayscale thumbnails, same class only"
+  },
+  "original_split": {
+    "description": "Original ImageDataGenerator(validation_split=0.2) partition: first int(0.2*n) sorted files per class are validation.",
+    "validation_images": 4122,
+    "validation_class_counts": {
+      "Pepper__bell___Bacterial_spot": 199,
+      "Pepper__bell___healthy": 295,
+      "Potato___Early_blight": 200,
+      "Potato___Late_blight": 200,
+      "Potato___healthy": 30,
+      "Tomato_Bacterial_spot": 425,
+      "Tomato_Early_blight": 200,
+      "Tomato_Late_blight": 381,
+      "Tomato_Leaf_Mold": 190,
+      "Tomato_Septoria_leaf_spot": 354,
+      "Tomato_Spider_mites_Two_spotted_spider_mite": 335,
+      "Tomato__Target_Spot": 280,
+      "Tomato__Tomato_YellowLeaf__Curl_Virus": 641,
+      "Tomato__Tomato_mosaic_virus": 74,
+      "Tomato_healthy": 318
+    },
+    "validation_images_with_duplicate_in_training": 17,
+    "validation_duplicate_leak_fraction": 0.004124
+  },
+  "split": {
+    "image_count": 20638,
+    "split_counts": {
+      "train": 14444,
+      "val": 3097,
+      "test": 3097
+    },
+    "split_fractions": {
+      "train": 0.699874,
+      "val": 0.150063,
+      "test": 0.150063
+    },
+    "class_count": 15,
+    "class_names": [
+      "Pepper__bell___Bacterial_spot",
+      "Pepper__bell___healthy",
+      "Potato___Early_blight",
+      "Potato___Late_blight",
+      "Potato___healthy",
+      "Tomato_Bacterial_spot",
+      "Tomato_Early_blight",
+      "Tomato_Late_blight",
+      "Tomato_Leaf_Mold",
+      "Tomato_Septoria_leaf_spot",
+      "Tomato_Spider_mites_Two_spotted_spider_mite",
+      "Tomato__Target_Spot",
+      "Tomato__Tomato_YellowLeaf__Curl_Virus",
+      "Tomato__Tomato_mosaic_virus",
+      "Tomato_healthy"
+    ],
+    "class_split_counts": {
+      "Pepper__bell___Bacterial_spot": {
+        "train": 697,
+        "val": 150,
+        "test": 150
+      },
+      "Pepper__bell___healthy": {
+        "train": 1034,
+        "val": 222,
+        "test": 222
+      },
+      "Potato___Early_blight": {
+        "train": 700,
+        "val": 150,
+        "test": 150
+      },
+      "Potato___Late_blight": {
+        "train": 700,
+        "val": 150,
+        "test": 150
+      },
+      "Potato___healthy": {
+        "train": 106,
+        "val": 23,
+        "test": 23
+      },
+      "Tomato_Bacterial_spot": {
+        "train": 1489,
+        "val": 319,
+        "test": 319
+      },
+      "Tomato_Early_blight": {
+        "train": 700,
+        "val": 150,
+        "test": 150
+      },
+      "Tomato_Late_blight": {
+        "train": 1337,
+        "val": 286,
+        "test": 286
+      },
+      "Tomato_Leaf_Mold": {
+        "train": 666,
+        "val": 143,
+        "test": 143
+      },
+      "Tomato_Septoria_leaf_spot": {
+        "train": 1239,
+        "val": 266,
+        "test": 266
+      },
+      "Tomato_Spider_mites_Two_spotted_spider_mite": {
+        "train": 1174,
+        "val": 251,
+        "test": 251
+      },
+      "Tomato__Target_Spot": {
+        "train": 982,
+        "val": 211,
+        "test": 211
+      },
+      "Tomato__Tomato_YellowLeaf__Curl_Virus": {
+        "train": 2246,
+        "val": 481,
+        "test": 481
+      },
+      "Tomato__Tomato_mosaic_virus": {
+        "train": 261,
+        "val": 56,
+        "test": 56
+      },
+      "Tomato_healthy": {
+        "train": 1113,
+        "val": 239,
+        "test": 239
+      }
+    },
+    "duplicate_groups": 20569,
+    "groups_crossing_splits": 0
+  },
+  "split_manifest": "backend\\data\\plantvillage_split.csv",
+  "split_seed": 42,
+  "test_set_policy": "The test split is excluded from training and model selection. It is evaluated once after the final configuration is selected."
+}

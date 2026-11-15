@@ -1,13 +1,17 @@
-import io
 import json
 import os
+import sys
 from pathlib import Path
 
 import numpy as np
 import tensorflow as tf
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from PIL import Image
+
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from backend.preprocessing import model_input_size, preprocess_bytes
 
 
 app = Flask(__name__)
@@ -38,11 +42,6 @@ BACKEND_DIR = Path(__file__).resolve().parent
 MODEL_PATH = BACKEND_DIR / "saved_model" / "plant_disease_model.h5"
 CLASS_NAMES_PATH = BACKEND_DIR / "saved_model" / "class_names.json"
 
-# Input size must match backend/train.py IMG_SIZE. EfficientNetB0 contains its
-# own rescaling layer, so both training and inference pass RGB pixels in
-# [0, 255] without dividing by 255.
-IMG_SIZE = (128, 128)
-
 if not MODEL_PATH.is_file():
     raise FileNotFoundError(
         f"Trained model not found at {MODEL_PATH}. "
@@ -54,7 +53,15 @@ if not CLASS_NAMES_PATH.is_file():
         "Retrain with the current backend/train.py to generate it."
     )
 
-model = tf.keras.models.load_model(str(MODEL_PATH))
+# The saved model defines the serving resolution, so training and inference
+# cannot drift apart if the model is retrained at 224x224 or another size.
+model = tf.keras.models.load_model(str(MODEL_PATH), compile=False)
+IMG_SIZE = model_input_size(model)
+if model.input_shape[-1] != 3:
+    raise ValueError(
+        f"Model must accept 3-channel RGB input, got {model.input_shape}"
+    )
+
 with CLASS_NAMES_PATH.open("r", encoding="utf-8") as file:
     class_names = json.load(file)
 
@@ -88,7 +95,13 @@ def request_too_large(_exc):
 
 @app.route("/health", methods=["GET"])
 def health():
-    return jsonify({"status": "ok", "classes": len(class_names)})
+    return jsonify(
+        {
+            "status": "ok",
+            "classes": len(class_names),
+            "input_size": [int(IMG_SIZE[1]), int(IMG_SIZE[0])],
+        }
+    )
 
 
 @app.route("/predict", methods=["POST"])
@@ -109,14 +122,13 @@ def predict():
             )
         if not raw:
             return jsonify({"error": "Uploaded file is empty"}), 400
-        image = Image.open(io.BytesIO(raw)).convert("RGB")
-        image = image.resize(IMG_SIZE)
-        # Match training: EfficientNetB0 contains its own input rescaling.
-        # Pass RGB pixel values in [0, 255]; do not divide by 255 here.
-        img_array = np.asarray(image, dtype=np.float32)
+        # Match training exactly: PIL bilinear resize, RGB, [0, 255] pixels.
+        # EfficientNetB0 contains its own input rescaling layer.
+        img_array = preprocess_bytes(raw, IMG_SIZE)
         img_array = np.expand_dims(img_array, axis=0)
 
-        predictions = model.predict(img_array, verbose=0)[0]
+        # A direct call avoids tf.data/predict() overhead for a single image.
+        predictions = np.asarray(model(img_array, training=False))[0]
         predicted_index = int(np.argmax(predictions))
         return jsonify(
             {
