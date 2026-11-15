@@ -1,14 +1,32 @@
 name: Retrain plant disease model
 
 # Manual retraining only. This workflow is intentionally NOT triggered by
-# pushes: training takes ~20 minutes on a CPU runner, rewrites the tracked
-# model artifacts, and should only run as a deliberate decision.
-# Requirements: the PlantVillage class folders are already committed under
-# dataset/PlantVillage/ in this repository's history, so the checkout step
-# below provides the training data with no downloads or credentials.
+# pushes: training rewrites the tracked model artifacts and should only run as
+# a deliberate decision.
+#
+# Requirements: the PlantVillage class folders are committed under
+# dataset/PlantVillage/. The committed split manifest is used as-is, so the
+# validation and test partitions remain comparable across runs.
 # No secrets are used or required by this workflow.
+
 on:
   workflow_dispatch:
+    inputs:
+      config:
+        description: "Experiment config (must not depend on an existing run)"
+        required: true
+        default: "backend/configs/baseline_128_frozen.json"
+        type: string
+      promote:
+        description: "Replace the tracked serving artifacts after training"
+        required: true
+        default: true
+        type: boolean
+      evaluate_test:
+        description: "Evaluate the held-out test split once after training"
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -16,7 +34,7 @@ permissions:
 jobs:
   train:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 300
     steps:
       - name: Check out repository and dataset
         uses: actions/checkout@v4
@@ -36,20 +54,52 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-      - name: Train model
-        run: python backend/train.py
+      - name: Run fast backend tests
+        run: python -m unittest discover -s backend -p "test_*.py" -t .
 
-      - name: Upload training report
+      - name: Resolve run name
+        run: echo "RUN_NAME=$(jq -r .run_name "${{ inputs.config }}")" >> "$GITHUB_ENV"
+
+      - name: Train model
+        run: |
+          if [ "${{ inputs.promote }}" = "true" ]; then
+            PROMOTE_FLAG="--promote"
+          else
+            PROMOTE_FLAG="--no-promote"
+          fi
+          python backend/train.py --config "${{ inputs.config }}" "$PROMOTE_FLAG"
+
+      - name: Evaluate validation split
+        run: |
+          python backend/evaluate.py \
+            --split val \
+            --model "backend/runs/$RUN_NAME/best_model.h5" \
+            --output-dir "backend/reports/$RUN_NAME-val"
+
+      - name: Evaluate held-out test split
+        if: ${{ inputs.evaluate_test }}
+        run: |
+          python backend/evaluate.py \
+            --split test \
+            --allow-test \
+            --model "backend/runs/$RUN_NAME/best_model.h5" \
+            --output-dir "backend/reports/$RUN_NAME-test"
+
+      - name: Upload training and evaluation artifacts
         uses: actions/upload-artifact@v4
         with:
           name: plant-disease-training-results
           path: |
-            backend/saved_model/training_metrics.json
+            backend/runs/${{ env.RUN_NAME }}/
+            backend/reports/
+            backend/saved_model/plant_disease_model.h5
             backend/saved_model/class_names.json
-          if-no-files-found: error
+            backend/saved_model/training_metrics.json
+          if-no-files-found: warn
           retention-days: 30
 
       - name: Commit updated model and training metadata
+        if: ${{ inputs.promote }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

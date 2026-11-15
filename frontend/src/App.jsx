@@ -10,6 +10,12 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/bmp'];
 const MAX_FILE_BYTES = 8 * 1024 * 1024; // Must stay within the backend's MAX_UPLOAD_MB.
 
+// The API returns the dataset's raw class names (for example
+// "Tomato__Tomato_YellowLeaf__Curl_Virus").  Display and speech use a readable
+// form while the API response and class mapping stay unchanged.
+const formatClassName = (name) =>
+  name.replace(/_+/g, ' ').replace(/\s+/g, ' ').trim();
+
 function App() {
   const [image, setImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
@@ -80,7 +86,7 @@ function App() {
       setPrecautionsVisible(false);
 
       if (voiceEnabled) {
-        speakPrediction(label);
+        speakPrediction(formatClassName(label));
       }
     } catch (err) {
       const message =
@@ -112,33 +118,49 @@ function App() {
     <div className="app">
       <div className="container">
         <h1>🌿 Plant Leaf Disease Detector</h1>
-        <input type="file" accept="image/jpeg,image/png,image/webp,image/bmp" onChange={handleImageChange} />
-        {previewUrl && <img src={previewUrl} alt="preview" className="preview" />}
+        <label htmlFor="leaf-image">Choose a leaf image</label>
+        <input
+          id="leaf-image"
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/bmp"
+          onChange={handleImageChange}
+        />
+        {previewUrl && (
+          <img src={previewUrl} alt="Selected leaf preview" className="preview" />
+        )}
         <div className="button-group">
-          <button onClick={handlePredict} disabled={!image || isPredicting}>
+          <button type="button" onClick={handlePredict} disabled={!image || isPredicting}>
             {isPredicting ? 'Predicting…' : 'Predict'}
           </button>
-          <button onClick={handlePrecautions}>Show Precautions</button>
+          <button type="button" onClick={handlePrecautions}>
+            Show Precautions
+          </button>
           <label>
             <input type="checkbox" checked={voiceEnabled} onChange={() => setVoiceEnabled(!voiceEnabled)} />
             Voice Output
           </label>
         </div>
-        {error && <p className="error">{error}</p>}
-        {prediction && (
-          <p>
-            <strong>Disease:</strong> {prediction}
-            {confidence !== null && (
-              <> (<strong>Confidence:</strong> {(confidence * 100).toFixed(1)}%)</>
-            )}
+        {error && (
+          <p className="error" role="alert">
+            {error}
           </p>
         )}
-        {prediction && (
-          <p className="disclaimer">
-            Confidence is the model's self-reported score, not a guarantee that
-            the prediction is correct. Confirm critical diagnoses independently.
-          </p>
-        )}
+        <div aria-live="polite">
+          {prediction && (
+            <p>
+              <strong>Disease:</strong> {formatClassName(prediction)}
+              {confidence !== null && (
+                <> (<strong>Confidence:</strong> {(confidence * 100).toFixed(1)}%)</>
+              )}
+            </p>
+          )}
+          {prediction && (
+            <p className="disclaimer">
+              Confidence is the model's self-reported score, not a guarantee that
+              the prediction is correct. Confirm critical diagnoses independently.
+            </p>
+          )}
+        </div>
 
         {precautionsVisible && (
           <div className="precautions">

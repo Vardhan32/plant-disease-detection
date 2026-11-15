@@ -1,0 +1,15 @@
+{
+  "run_name": "baseline_128_frozen",
+  "resolution": 128,
+  "batch_size": 16,
+  "epochs": 5,
+  "fine_tune_epochs": 0,
+  "augmentation": "none",
+  "class_weights": "none",
+  "learning_rate": 0.0001,
+  "early_stopping_patience": 99,
+  "reduce_lr_patience": 99,
+  "selection_metric": "macro_f1",
+  "promote": false,
+  "seed": 42
+}
